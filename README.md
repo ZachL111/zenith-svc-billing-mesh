@@ -1,68 +1,40 @@
 # zenith-svc-billing-mesh
 
-`zenith-svc-billing-mesh` treats backend services as a local verification problem. The Kotlin implementation is intentionally narrow, but the fixtures and notes make the behavior explicit.
+`zenith-svc-billing-mesh` keeps a focused Kotlin implementation around backend services. The project goal is to design a Kotlin verification harness for billing systems, covering storage recovery, log and snapshot fixtures, and failure-oriented tests.
 
-## Zenith Svc Billing Mesh Checkpoints
+## Use Case
 
-Treat the compact fixture as the contract and the extended examples as a scratchpad. The code should stay boring enough that a change in behavior is obvious from the test output.
+The project exists to keep a narrow engineering decision visible and testable. For this repo, that decision is how queue pressure and worker slack should influence a review result.
 
-## Useful Pieces
+## Zenith Svc Billing Mesh Review Notes
 
-- Includes extended examples for queue pressure, including `surge` and `degraded`.
-- Documents bounded workers tradeoffs in `docs/operations.md`.
-- Runs locally with a single verification command and no external credentials.
-- Stores project constants and verification metadata in `metadata/project.json`.
-- Adds a repository audit script that checks structure before running the language verifier.
+`stale` and `baseline` are the cases worth reading first. They show the optimistic and cautious ends of the fixture.
 
-## What This Is For
+## Highlights
 
-I use this kind of project to make a rule visible before adding more machinery around it. The important part here is not the size of the codebase. It is that the input signals, scoring rule, fixture data, and expected output can all be checked in one sitting.
+- `fixtures/domain_review.csv` adds cases for queue pressure and retry load.
+- `metadata/domain-review.json` records the same cases in structured form.
+- `config/review-profile.json` captures the read order and the two review questions.
+- `examples/zenith-svc-billing-walkthrough.md` walks through the case spread.
+- The Kotlin code includes a review path for `queue pressure` and `queue pressure`.
+- `docs/field-notes.md` explains the strongest and weakest cases.
 
-## Project Layout
+## Code Layout
 
-- `src`: primary implementation
-- `tests`: verification harness
-- `fixtures`: compact golden scenarios
-- `examples`: expanded scenario set
-- `metadata`: project constants and verification metadata
-- `docs`: operations and extension notes
-- `scripts`: local verification and audit commands
+The core code exposes a scoring path and the added review layer uses `signal`, `slack`, `drag`, and `confidence`. The domain terms are `queue pressure`, `retry load`, `worker slack`, and `session drift`.
 
-## Architecture Notes
+The Kotlin code keeps the review rule close to the tests.
 
-The interesting part is the boundary between accepted and reviewed scenarios. Extended examples sit near that boundary so future edits can show whether the model became more permissive or more cautious. The Kotlin version keeps data classes and model logic close together for a JVM-friendly core.
-
-## Local Workflow
+## Run The Check
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify.ps1
 ```
 
-This runs the language-level build or test path against the compact fixture set.
+## Regression Path
 
-## Case Study
+The same command runs the local verification path. The highest-scoring domain case is `stale` at 208, which lands in `ship`. The most cautious case is `baseline` at 177, which lands in `ship`.
 
-`surge` is the first example I would inspect because it lands on the `accept` path with a score of 192. The broader file also keeps `degraded` at -15 and `surge` at 192, which gives the model a useful low-to-high spread.
+## Future Work
 
-## Quality Gate
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/audit.ps1
-```
-
-The audit command checks repository structure and README constraints before it delegates to the verifier.
-
-## Scope
-
-The repository favors determinism over breadth. It does not pull live data, keep secrets, or depend on network access for verification.
-
-## Expansion Ideas
-
-- Add a short report command that prints the score breakdown for a single scenario.
-- Add malformed input fixtures so the failure path is as visible as the happy path.
-- Split the scoring constants into a typed configuration object and validate it before use.
-- Add one more backend services fixture that focuses on a malformed or borderline input.
-
-## Tooling
-
-The only required setup is the local Kotlin toolchain. After cloning, stay in the repo root so fixture paths resolve correctly.
+The fixture set is small enough to audit by hand. The next useful expansion is malformed input coverage, not extra surface area.
